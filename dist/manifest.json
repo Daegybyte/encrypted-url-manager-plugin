@@ -9,7 +9,7 @@
   },
   "action": {
     "default_popup": "index.html",
-    "default_title": "Profile Links",
+    "default_title": "Encrypted URL Manager",
     "default_icon": "./images/dp_d20_logo.png"
   }
 }
