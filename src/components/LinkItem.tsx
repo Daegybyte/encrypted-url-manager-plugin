@@ -1,6 +1,20 @@
 import { useState } from "react";
 import type { LinkEntry } from "../types";
 
+/**
+ * Props for the LinkItem component.
+ *
+ * entry          — the link data to display
+ * index          — position in the list, used for drag and drop
+ * onCopy         — decrypts and copies the URL to clipboard
+ * onDelete       — removes the entry from IndexedDB
+ * onEdit         — validates, re-encrypts, and updates the entry
+ * onDragStart    — records the drag source index in the parent hook
+ * onDrop         — triggers reorder logic in the parent hook
+ * onCopied       — surfaces a success toast with the label name
+ * onError        — surfaces an error toast
+ * animationDelay — staggered slide-in delay in milliseconds
+ */
 interface LinkItemProps {
   entry: LinkEntry;
   index: number;
@@ -14,6 +28,22 @@ interface LinkItemProps {
   animationDelay: number;
 }
 
+/**
+ * LinkItem — a single row in the URL list.
+ *
+ * Renders in one of two modes:
+ *
+ *   Normal mode  — shows the label with copy/edit/delete actions
+ *                  that appear on hover, and drag handle on the left.
+ *
+ *   Editing mode — replaces the row with an inline form pre-filled
+ *                  with the current label. URL is intentionally left
+ *                  blank for security — the encrypted value is never
+ *                  decrypted back into a visible input field.
+ *
+ * Copy state cycles through idle → copying → copied → idle to drive
+ * the visual feedback on the label button (> becomes ✓ briefly).
+ */
 export function LinkItem({
   entry,
   index,
@@ -26,13 +56,27 @@ export function LinkItem({
   onError,
   animationDelay,
 }: LinkItemProps) {
+  // Tracks the copy animation state for the label button.
   const [state, setState] = useState<"idle" | "copying" | "copied">("idle");
+
+  // Whether the current row is an active drag-over target.
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // Whether this row is currently showing the inline edit form.
   const [editing, setEditing] = useState(false);
+
+  // Edit form field values — label pre-filled, URL intentionally blank.
   const [editLabel, setEditLabel] = useState(entry.label);
   const [editUrl, setEditUrl] = useState("");
+
+  // Tracks the async save in progress to disable the Save button.
   const [saving, setSaving] = useState(false);
 
+  /**
+   * Initiates a copy — decrypts the URL and writes it to the clipboard.
+   * Guards against double-clicks by checking state !== "idle".
+   * Resets to idle after 1.5s so the ✓ feedback clears automatically.
+   */
   async function handleCopy() {
     if (state !== "idle") return;
     setState("copying");
@@ -47,6 +91,11 @@ export function LinkItem({
     }
   }
 
+  /**
+   * Submits the inline edit form.
+   * Delegates to onEdit which handles sanitisation, validation,
+   * re-encryption, and the IndexedDB write.
+   */
   async function handleEditSave() {
     setSaving(true);
     const error = await onEdit(entry.id, editLabel, editUrl);
@@ -58,34 +107,48 @@ export function LinkItem({
     setEditing(false);
   }
 
+  /**
+   * Opens the inline edit form, pre-filling the label.
+   * URL is always reset to empty — we never surface the decrypted
+   * URL in a visible input field.
+   */
   function handleEditOpen() {
     setEditLabel(entry.label);
     setEditUrl("");
     setEditing(true);
   }
 
+  /**
+   * Keyboard shortcuts for the edit form:
+   * Enter  — save
+   * Escape — cancel and return to normal mode
+   */
   function handleEditKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter") handleEditSave();
     if (e.key === "Escape") setEditing(false);
   }
 
+  // Shared base classes for both edit form inputs.
   const inputBase =
     "bg-bg border border-border-hi rounded text-text font-mono text-[11px] px-2 py-1 outline-none focus:border-accent transition-colors duration-150 placeholder:text-muted";
 
+  // ── Editing mode ────────────────────────────────────────────────────────────
   if (editing) {
     return (
       <li className="flex flex-col gap-1.5 px-4 py-2 mx-2 rounded-md bg-surface animate-slide-in">
         <div className="flex gap-2">
+          {/* Label input — pre-filled with current label, 48 char max */}
           <input
             className={`${inputBase} w-24 flex-none`}
             value={editLabel}
             onChange={(e) => setEditLabel(e.target.value)}
             onKeyDown={handleEditKeyDown}
             placeholder="label"
-            maxLength={24}
+            maxLength={48}
             autoFocus
             spellCheck={false}
           />
+          {/* URL input — intentionally blank; never pre-filled with decrypted value */}
           <input
             className={`${inputBase} flex-1`}
             value={editUrl}
@@ -115,10 +178,12 @@ export function LinkItem({
     );
   }
 
+  // ── Normal mode ─────────────────────────────────────────────────────────────
   return (
     <li
       className={[
         "group flex items-center gap-1.5 pl-4 pr-3 py-1.5 mx-2 rounded-md animate-slide-in transition-colors duration-150 hover:bg-surface",
+        // Accent top border indicates this row is the active drop target.
         isDragOver ? "border-t-2 border-accent -mt-0.5" : "",
       ].join(" ")}
       style={{ animationDelay: `${animationDelay}ms` }}
@@ -135,6 +200,7 @@ export function LinkItem({
         await onDrop(index);
       }}
     >
+      {/* Drag handle — only visible on row hover */}
       <span className="w-4 h-4 text-muted opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-grab active:cursor-grabbing flex-shrink-0 flex items-center justify-center">
         <svg
           viewBox="0 0 24 24"
@@ -149,6 +215,11 @@ export function LinkItem({
         </svg>
       </span>
 
+      {/*
+        Label button — primary action for the row.
+        The ::before pseudo-element shows > normally, ✓ when copied.
+        Copy state drives the colour and content transitions.
+      */}
       <button
         onClick={handleCopy}
         title="Click to copy URL"
@@ -167,7 +238,7 @@ export function LinkItem({
         {entry.label}
       </button>
 
-      {/* Edit button */}
+      {/* Edit button — visible on hover, accent highlight */}
       <button
         onClick={handleEditOpen}
         title="Edit"
@@ -185,6 +256,7 @@ export function LinkItem({
         </svg>
       </button>
 
+      {/* Delete button — visible on hover, danger highlight */}
       <button
         onClick={() => onDelete(entry.id)}
         title="Delete"
