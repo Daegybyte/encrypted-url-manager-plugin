@@ -8,7 +8,7 @@
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; object-src 'self'"
   },
   "action": {
-    "default_popup": "Encrypted URL Manager",
+    "default_popup": "index.html",
     "default_title": "Profile Links",
     "default_icon": "./images/dp_d20_logo.png"
   }
