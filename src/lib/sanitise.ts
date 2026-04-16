@@ -36,7 +36,7 @@ export function sanitiseLabel(raw: string): string {
 export function validateUrl(raw: string): string | null {
   try {
     const url = new URL(raw.trim());
-    if (!["http:", "https:"].includes(url.protocol)) return null;
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
     return url.href;
   } catch {
     // URL constructor throws on invalid input — treat as invalid.

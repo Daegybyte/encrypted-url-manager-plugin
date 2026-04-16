@@ -19,7 +19,10 @@ import { useToast } from "./hooks/useToast";
  * validation are all handled inside useLinks. App only connects
  * hooks to components via props.
  */
+
 export default function App() {
+  const version = chrome.runtime.getManifest().version;
+
   // Controls whether the add link form panel is expanded.
   const [addOpen, setAddOpen] = useState(false);
 
@@ -31,7 +34,6 @@ export default function App() {
   return (
     <div className="w-full bg-bg text-text font-sans text-[13px] overflow-hidden">
       <Header addOpen={addOpen} onToggleAdd={() => setAddOpen((o) => !o)} />
-
       {/* Collapsible form for adding a new link. Controlled by addOpen. */}
       <AddPanel
         open={addOpen}
@@ -40,7 +42,6 @@ export default function App() {
         onError={showToast}
         onSuccess={showToast}
       />
-
       {/* Three possible list states: loading, empty, or populated. */}
       {loading ? (
         <div className="flex items-center justify-center py-8">
@@ -69,16 +70,14 @@ export default function App() {
           ))}
         </ul>
       )}
-
       {/* Footer shows encryption spec as a passive trust indicator. */}
       <footer className="border-t border-border px-4 py-1.5 flex justify-between items-center">
         <span className="font-mono text-[9px] text-muted tracking-tight">AES-GCM 256</span>
         <span className="flex items-center gap-1 font-mono text-[9px] text-accent opacity-60 tracking-tight">
           <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_5px_theme(colors.accent)]" />
-          encrypted
+          encrypted · v{version}
         </span>
       </footer>
-
       {/* Global toast notification — rendered at root level so it
           overlays all other content regardless of which component triggers it. */}
       <Toast {...toast} />
