@@ -28,7 +28,7 @@ export function Header({ addOpen, onToggleAdd }: HeaderProps) {
         {/* Glowing dot — passive visual indicator that the extension is active */}
         <div className="w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_theme(colors.accent)]" />
         <h1 className="font-mono text-xs font-semibold tracking-widest uppercase text-text">
-          Encrypted URL Manager
+          URL Manager
         </h1>
       </div>
 

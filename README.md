@@ -70,7 +70,7 @@ Drag the handle on the left of any row to reorder your links.
 URLs are stored as AES-GCM 256-bit encrypted ciphertext in IndexedDB. You can verify this yourself
 in Chrome DevTools under Application → IndexedDB → ProfileLinksDB → links.
 
-![Encrypted storage](public/documentation_images/7-stored-encrypted-urls.png)
+![Encrypted storage](public/documentation_images/0-encrypted-storage.png)
 
 ---
 
