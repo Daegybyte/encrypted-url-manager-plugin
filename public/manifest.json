@@ -8,13 +8,13 @@
     "extension_pages": "script-src 'self'; style-src 'self'; font-src 'self'"
   },
   "icons": {
-    "16": "./images/dp_d20_logo.png",
-    "48": "./images/dp_d20_logo.png",
-    "128": "./images/dp_d20_logo.png"
+    "16": "images/dp_d20_logo.png",
+    "48": "images/dp_d20_logo.png",
+    "128": "images/dp_d20_logo.png"
   },
   "action": {
     "default_popup": "index.html",
     "default_title": "Encrypted URL Manager",
-    "default_icon": "./images/dp_d20_logo.png"
+    "default_icon": "images/dp_d20_logo.png"
   }
 }
